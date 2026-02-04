@@ -57,6 +57,7 @@ def main(ctx: click.Context) -> None:
 @click.option("--skip", multiple=True, help="Skip specific checks (can be repeated)")
 @click.option("--strict", is_flag=True, help="Use stricter thresholds")
 @click.option("--offline/--online", default=True, help="Disable/enable network checks")
+@click.option("--plain", is_flag=True, help="Plain ASCII output (no unicode/colors, CI-friendly)")
 @click.option("--debug", is_flag=True, help="Enable debug output")
 @click.option("--config", "-c", type=click.Path(exists=True), help="Path to config file")
 def scan_cmd(
@@ -69,6 +70,7 @@ def scan_cmd(
     skip: tuple[str, ...],
     strict: bool,
     offline: bool,
+    plain: bool,
     debug: bool,
     config: str | None,
 ) -> None:
@@ -102,7 +104,7 @@ def scan_cmd(
         report = scan(repo_path, cfg)
 
         # Render output
-        renderer = get_renderer(format)
+        renderer = get_renderer(format, plain=plain)
         result = renderer.render(report)
 
         # Write output
@@ -124,7 +126,8 @@ def scan_cmd(
 
         if violated:
             if debug or format == "text":
-                click.echo(f"\n❌ Policy violation: {reason}", err=True)
+                marker = "[FAIL]" if plain else "❌"
+                click.echo(f"\n{marker} Policy violation: {reason}", err=True)
             sys.exit(EXIT_POLICY_VIOLATED)
 
         sys.exit(EXIT_OK)

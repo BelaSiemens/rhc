@@ -7,13 +7,17 @@ from rhc.renderers.text import TextRenderer
 __all__ = ["JsonRenderer", "MarkdownRenderer", "TextRenderer"]
 
 
-def get_renderer(format: str):
-    """Get renderer by format name."""
-    renderers = {
-        "text": TextRenderer,
-        "json": JsonRenderer,
-        "md": MarkdownRenderer,
-        "markdown": MarkdownRenderer,
-    }
-    renderer_class = renderers.get(format.lower(), TextRenderer)
-    return renderer_class()
+def get_renderer(format: str, plain: bool = False):
+    """Get renderer by format name.
+
+    Args:
+        format: Output format (text, json, md, markdown)
+        plain: If True, use ASCII-only output for text format
+    """
+    if format.lower() in ("text",):
+        return TextRenderer(plain=plain)
+    elif format.lower() in ("json",):
+        return JsonRenderer()
+    elif format.lower() in ("md", "markdown"):
+        return MarkdownRenderer()
+    return TextRenderer(plain=plain)
